@@ -22,6 +22,13 @@ class SupervisorProcess extends WorkerProcess
     public $options;
 
     /**
+     * Indicates if the process is "dead".
+     *
+     * @var bool
+     */
+    public $dead = false;
+
+    /**
      * The exit codes on which supervisor should be marked as dead.
      *
      * @var array
@@ -95,5 +102,15 @@ class SupervisorProcess extends WorkerProcess
         }
 
         $this->restart();
+    }
+
+    /**
+     * Mark the process as "dead".
+     *
+     * @return void
+     */
+    protected function markAsDead()
+    {
+        $this->dead = true;
     }
 }

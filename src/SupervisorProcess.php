@@ -3,10 +3,7 @@
 namespace Laravel\Horizon;
 
 use Closure;
-use Laravel\Horizon\Contracts\HorizonCommandQueue;
 use Laravel\Horizon\Events\SupervisorProcessDied;
-use Laravel\Horizon\MasterSupervisorCommands\AddSupervisor;
-use Laravel\Horizon\SupervisorCommands\Terminate;
 
 class SupervisorProcess extends WorkerProcess
 {
@@ -23,13 +20,6 @@ class SupervisorProcess extends WorkerProcess
      * @var \Laravel\Horizon\SupervisorOptions
      */
     public $options;
-
-    /**
-     * Indicates if the process is "dead".
-     *
-     * @var bool
-     */
-    public $dead = false;
 
     /**
      * The exit codes on which supervisor should be marked as dead.
@@ -96,8 +86,6 @@ class SupervisorProcess extends WorkerProcess
         // an indication that the supervisor was simply purposefully terminated.
         $exitCode = $this->process->getExitCode();
         event(new SupervisorProcessDied($this, $exitCode));
-        $this->terminateWithStatus($exitCode);
-        $this->markAsDead();
 
         // If the supervisor exited with a status code that we do not restart on then
         // we will not attempt to restart it. Otherwise, we will need to provision
@@ -106,45 +94,6 @@ class SupervisorProcess extends WorkerProcess
             return;
         }
 
-        $this->reprovision();
-    }
-
-    /**
-     * Re-provision this supervisor process based on the provisioning plan.
-     *
-     * @return void
-     */
-    protected function reprovision()
-    {
-        app(HorizonCommandQueue::class)->push(
-            MasterSupervisor::commandQueue(),
-            AddSupervisor::class,
-            $this->options->toArray()
-        );
-    }
-
-    /**
-     * Terminate the supervisor with the given status.
-     *
-     * @param  int  $status
-     * @return void
-     */
-    public function terminateWithStatus($status)
-    {
-        app(HorizonCommandQueue::class)->push(
-            MasterSupervisor::commandQueue(),
-            Terminate::class,
-            ['status' => $status]
-        );
-    }
-
-    /**
-     * Mark the process as "dead".
-     *
-     * @return void
-     */
-    protected function markAsDead()
-    {
-        $this->dead = true;
+        $this->restart();
     }
 }

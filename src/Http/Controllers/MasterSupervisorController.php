@@ -4,6 +4,7 @@ namespace Laravel\Horizon\Http\Controllers;
 
 use Laravel\Horizon\Contracts\MasterSupervisorRepository;
 use Laravel\Horizon\Contracts\SupervisorRepository;
+use Laravel\Horizon\ProvisioningPlan;
 
 class MasterSupervisorController extends Controller
 {
@@ -22,7 +23,23 @@ class MasterSupervisorController extends Controller
         $supervisors = collect($supervisors->all())->sortBy('name')->groupBy('master');
 
         return $masters->each(function ($master, $name) use ($supervisors) {
-            $master->supervisors = $supervisors->get($name);
+            $master->supervisors = $supervisors->get($name)
+                ->merge(
+                    collect(ProvisioningPlan::get($name)->plan[config('horizon.env') ?? config('app.env')])
+                        ->map(function ($value, $key) use ($name) {
+                            return (object) [
+                                'name' => $name . ':' . $key,
+                                'master' => $name,
+                                'status' => 'inactive',
+                                'processes' => [],
+                                'options' => [
+                                    'queue' => '',
+                                ]
+                            ];
+                        })
+                )
+                ->unique('name')
+                ->values();
         });
     }
 }

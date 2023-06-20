@@ -4,6 +4,7 @@ namespace Laravel\Horizon;
 
 use Carbon\CarbonImmutable;
 use Closure;
+use Laravel\Horizon\Contracts\SupervisorRepository;
 use Laravel\Horizon\Events\UnableToLaunchProcess;
 use Laravel\Horizon\Events\WorkerProcessRestarting;
 use Symfony\Component\Process\Exception\ExceptionInterface;
@@ -102,6 +103,9 @@ class WorkerProcess
     {
         if ($this->process->isStarted()) {
             event(new WorkerProcessRestarting($this));
+
+            // When restarting, the Supervisor check if it is already running based on this key
+            app(SupervisorRepository::class)->forget($this->name);
         }
 
         $this->start($this->output);

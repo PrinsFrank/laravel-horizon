@@ -96,6 +96,8 @@ class SupervisorProcess extends WorkerProcess
         // should be marked as dead and not be restarted. Typically, this could be
         // an indication that the supervisor was simply purposefully terminated.
         $exitCode = $this->process->getExitCode();
+
+        $this->markAsDead();
         event(new SupervisorProcessDied($this, $exitCode));
 
         // If the supervisor exited with a status code that we do not restart on then
@@ -138,7 +140,6 @@ class SupervisorProcess extends WorkerProcess
         app(HorizonCommandQueue::class)->push(
             $this->options->name, Terminate::class, ['status' => $status]
         );
-        $this->restart();
     }
 
     /**

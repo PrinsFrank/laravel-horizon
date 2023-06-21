@@ -3,7 +3,11 @@
 namespace Laravel\Horizon;
 
 use Closure;
+use Laravel\Horizon\Contracts\HorizonCommandQueue;
+use Laravel\Horizon\Contracts\SupervisorRepository;
 use Laravel\Horizon\Events\SupervisorProcessDied;
+use Laravel\Horizon\MasterSupervisorCommands\AddSupervisor;
+use Laravel\Horizon\SupervisorCommands\Terminate;
 
 class SupervisorProcess extends WorkerProcess
 {
@@ -101,6 +105,39 @@ class SupervisorProcess extends WorkerProcess
             return;
         }
 
+        $this->reprovision();
+    }
+
+    /**
+     * Re-provision this supervisor process based on the provisioning plan.
+     *
+     * @return void
+     */
+    protected function reprovision()
+    {
+        if (isset($this->name)) {
+            // When restarting, the Supervisor checks if it is already running based on this key
+            app(SupervisorRepository::class)->forget($this->name);
+        }
+
+        app(HorizonCommandQueue::class)->push(
+            MasterSupervisor::commandQueue(),
+            AddSupervisor::class,
+            $this->options->toArray()
+        );
+    }
+
+    /**
+     * Terminate the supervisor with the given status.
+     *
+     * @param  int  $status
+     * @return void
+     */
+    public function terminateWithStatus($status)
+    {
+        app(HorizonCommandQueue::class)->push(
+            $this->options->name, Terminate::class, ['status' => $status]
+        );
         $this->restart();
     }
 

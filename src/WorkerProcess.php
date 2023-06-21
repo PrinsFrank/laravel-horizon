@@ -103,9 +103,6 @@ class WorkerProcess
     {
         if ($this->process->isStarted()) {
             event(new WorkerProcessRestarting($this));
-
-            // When restarting, the Supervisor check if it is already running based on this key
-            app(SupervisorRepository::class)->forget($this->name);
         }
 
         $this->start($this->output);

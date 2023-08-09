@@ -5,6 +5,7 @@ namespace Laravel\Horizon;
 use Closure;
 use Laravel\Horizon\Contracts\HorizonCommandQueue;
 use Laravel\Horizon\Events\SupervisorProcessDied;
+use Laravel\Horizon\Contracts\SupervisorRepository;
 use Laravel\Horizon\MasterSupervisorCommands\AddSupervisor;
 use Laravel\Horizon\SupervisorCommands\Terminate;
 
@@ -116,6 +117,10 @@ class SupervisorProcess extends WorkerProcess
      */
     protected function reprovision()
     {
+        if (isset($this->name)) {
+            app(SupervisorRepository::class)->forget($this->name);
+        }
+
         app(HorizonCommandQueue::class)->push(
             MasterSupervisor::commandQueue(),
             AddSupervisor::class,

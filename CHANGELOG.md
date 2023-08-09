@@ -1,6 +1,21 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/horizon/compare/v5.16.1...5.x)
+## [Unreleased](https://github.com/laravel/horizon/compare/v5.19.0...5.x)
+
+## [v5.19.0](https://github.com/laravel/horizon/compare/v5.18.0...v5.19.0) - 2023-07-14
+
+- Make sure that missing supervisors are correctly displayed when using multiple environments by [@PrinsFrank](https://github.com/PrinsFrank) in https://github.com/laravel/horizon/pull/1294
+
+## [v5.18.0](https://github.com/laravel/horizon/compare/v5.17.0...v5.18.0) - 2023-06-30
+
+- Fix supervisor reprovisioning by [@PrinsFrank](https://github.com/PrinsFrank) in https://github.com/laravel/horizon/pull/1288
+- Display inactive supervisors in dashboard by [@PrinsFrank](https://github.com/PrinsFrank) in https://github.com/laravel/horizon/pull/1286
+- Fix autoscaler scaling down below zero when (nr. of queues * minProcesses) is higher than maxProcesses by [@PrinsFrank](https://github.com/PrinsFrank) in https://github.com/laravel/horizon/pull/1292
+
+## [v5.17.0](https://github.com/laravel/horizon/compare/v5.16.1...v5.17.0) - 2023-06-13
+
+- Add events for when supervisors are terminated by @PrinsFrank in https://github.com/laravel/horizon/pull/1282
+- Fixed occasional flashing when toggling scheme by @ramonrietdijk in https://github.com/laravel/horizon/pull/1283
 
 ## [v5.16.1](https://github.com/laravel/horizon/compare/v5.16.0...v5.16.1) - 2023-05-29
 
